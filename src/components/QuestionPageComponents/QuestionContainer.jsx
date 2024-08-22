@@ -1,11 +1,11 @@
-import { useSelector } from 'react-redux'
-import { questionSelector } from '../../redux/questionSlice'
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
+import { questionSelector } from "../../redux/questionSlice";
+import { useNavigate } from "react-router-dom";
 export default function QuestionContainer() {
   const questions = useSelector(questionSelector);
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col gap-3.5 w-full">
+    <div className="flex flex-col gap-3.5 w-full justify-between">
       <h2 className="font-medium text-xl text-blue-500">Question collection</h2>
       <div className="flex flex-col gap-3 lg:h-[540px] w-full overflow-y-scroll">
         {questions.map((question) => (

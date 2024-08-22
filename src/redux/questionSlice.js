@@ -50,7 +50,7 @@ export const { addNewTodo } = questionSlice.actions;
 // export const { questionSelector } = questionSlice.selectors;
 export const questionSelector = (state) => state.questions;
 
-export const singleQuestionSelector = (state, index) => state.questions[index];
+export const singleQuestionSelector = (index) => (state) => state.questions[index];
 
 export const totalAmountQuestion = (state) => state.questions.length;
 

@@ -1,227 +1,139 @@
-import { Form, Field } from 'react-final-form'
-import { useDispatch } from 'react-redux'
-import { addNewTodo } from '../../redux/questionSlice'
-
+import { Form, Field } from "react-final-form";
+import { useDispatch } from "react-redux";
+import { addNewTodo } from "../../redux/questionSlice";
+import { InputForm } from "./InputForm";
+import { TextAreaForm } from "./TextAreaForm";
+import { RadioComponent } from "./RadioComponent";
+import { MetaError } from "./MetaError";
 export default function AddQuestionForm() {
   const dispatch = useDispatch();
-  const onSubmit = (values, form) => {
-    const { type, question, answerText, correctAnswer, choiceA, choiceB, choiceC, choiceD } = values;
-    dispatch(addNewTodo(type === 'text' ?
-      {
-        id: new Date().getTime(),
-        question: question,
-        type: type,
-        answerText: answerText,
-      } : 
-      {
-        id: new Date().getTime(),
-        question: question,
-        type: type,
-        correctAnswer: correctAnswer,
-        choices: [
-          {
-            key: 'A',
-            answer: choiceA
-          },
-          {
-            key: 'B',
-            answer: choiceB
-          },
-          {
-            key: 'C',
-            answer: choiceC
-          },
-          {
-            key: 'D',
-            answer: choiceD
-          }
-        ]
-      }
-    ))
-    // form.reset({ keepValues: true }); // this method will active validation
-    values.question = "";
-    values.answerText = "";
-    values.correctAnswer = 'A';
-    values.choiceA = "";
-    values.choiceB = "";
-    values.choiceC = "";
-    values.choiceD = "";
-  }
-
-  const validate = values => {
-    const errors = {};
-    const { question, type, answerText, choiceA, choiceB, choiceC, choiceD } = values;
-    if (!question) {
-      errors.question = 'Please type question information'
-    }
-    if (type === 'text' && !answerText) {
-      errors.answerText = 'Please type the correct answer'
-    }
-    else if (type === 'multi') {
-      if (!choiceA || !choiceB || !choiceC || !choiceD) {
-        errors.choiceD = 'Please type all the answers'
-      }
-    }
-    return errors;
-  }
 
   const initialValues = {
-    type: 'text',
-    correctAnswer: 'A'
-  }
+    type: "text",
+    correctAnswer: "A",
+  };
+
+  
+  const onSubmit = (values, form) => {
+    const {
+      type,
+      question,
+      answerText,
+      correctAnswer,
+      choiceA,
+      choiceB,
+      choiceC,
+      choiceD,
+    } = values;
+    const newQuestion = {
+      id: new Date().getTime(),
+      question: question,
+      type: type,
+    };
+    if (type === "text") {
+      newQuestion.answerText = answerText;
+    } else {
+      (newQuestion.correctAnswer = correctAnswer),
+        (newQuestion.choices = [
+          {
+            key: "A",
+            answer: choiceA,
+          },
+          {
+            key: "B",
+            answer: choiceB,
+          },
+          {
+            key: "C",
+            answer: choiceC,
+          },
+          {
+            key: "D",
+            answer: choiceD,
+          },
+        ]);
+    }
+    dispatch(addNewTodo(newQuestion));
+    form.reset(initialValues); // this method will active validation
+  };
+
+  const required = (value) =>
+    value ? undefined : "Please fill the information";
 
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validate}
       initialValues={initialValues}
       render={({ handleSubmit, form, submitting, pristine, values }) => (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-10 w-full"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-10 w-[500px]">
           <h2 className="font-medium text-xl text-emerald-500">
             Add question to the collection
           </h2>
-          <Field name="question">
-            {({ input, meta }) => (
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-row gap-3 justify-center items-center">
-                  <label className="font-medium">Question</label>
-                  <input
-                    {...input}
-                    type="text"
-                    placeholder="Type your question ..."
-                    className="border-1 border-black rounded p-3 shadow text-base w-full"
-                  />
-                </div>
-                {meta.error && meta.touched && (
-                  <span className="text-red-400 text-sm font-medium">
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+          <InputForm
+            name={"question"}
+            validate={required}
+            label={"Question"}
+            placeholder={"Type your question ... "}
+          />
           <Field name="type">
             {({ input, meta }) => (
               <div className="flex flex-col gap-3">
                 <div className="flex flex-row justify-between">
                   <label className="font-medium">Types</label>
-                  <div className="flex flex-row gap-3">
-                    <label className="font-medium">Text</label>
-                    <input
-                      {...input}
-                      type="radio"
-                      value={"text"}
-                      defaultChecked
-                    />
-                  </div>
-                  <div className="flex flex-row gap-3">
-                    <label className="font-medium">Multiple choices</label>
-                    <input {...input} type="radio" value={"multi"} />
-                  </div>
+                  <RadioComponent
+                    label={"Text"}
+                    input={input}
+                    value={"text"}
+                    checked={input.value === 'text' ? true: false}
+                    defaultChecked={true}
+                    
+                  />
+                  <RadioComponent
+                    label={"Multiple choices"}
+                    input={input}
+                    value={"multi"}
+                    checked={input.value === 'multi' ? true: false}
+                    defaultChecked={false}
+                  />
                 </div>
-                {meta.error && meta.touched && (
-                  <span className="text-red-400 text-sm font-medium">
-                    {meta.error}
-                  </span>
-                )}
+                <MetaError error={meta.error} touched={meta.touched} />
               </div>
             )}
           </Field>
           {values.type === "text" && (
-            <Field name="answerText">
-              {({ input, meta }) => (
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-row gap-3">
-                    <label className="font-medium">Answer</label>
-                    <textarea
-                      {...input}
-                      placeholder="Type your answer ..."
-                      rows="13"
-                      cols="50"
-                      style={{ resize: "none" }}
-                      className="border-1 border-black rounded p-3 shadow text-base w-full"
-                    />
-                  </div>
-                  {meta.error && meta.touched && (
-                    <span className="text-red-400 text-sm font-medium">
-                      {meta.error}
-                    </span>
-                  )}
-                </div>
-              )}
-            </Field>
+            <Field
+              name="answerText"
+              validate={required}
+              component={TextAreaForm}
+            ></Field>
           )}
           {values.type === "multi" && (
             <div className="flex flex-col gap-4">
               <h2 className="text-blue-500 font-medium">Choices</h2>
-              <Field name="choiceA">
-                {({ input }) => (
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-row gap-3 justify-center items-center">
-                      <label className="font-medium w-fit">A</label>
-                      <input
-                        {...input}
-                        type="text"
-                        placeholder="Type your first choice ..."
-                        className="border-1 border-black rounded p-3 shadow text-base w-full"
-                      />
-                    </div>
-                  </div>
-                )}
-              </Field>
-              <Field name="choiceB">
-                {({ input }) => (
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-row gap-3 justify-center items-center">
-                      <label className="font-medium w-fit">B</label>
-                      <input
-                        {...input}
-                        type="text"
-                        placeholder="Type your second choice ..."
-                        className="border-1 border-black rounded p-3 shadow text-base w-full"
-                      />
-                    </div>
-                  </div>
-                )}
-              </Field>
-              <Field name="choiceC">
-                {({ input }) => (
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-row gap-3 justify-center items-center">
-                      <label className="font-medium w-fit">C</label>
-                      <input
-                        {...input}
-                        type="text"
-                        placeholder="Type your third choice ..."
-                        className="border-1 border-black rounded p-3 shadow text-base w-full"
-                      />
-                    </div>
-                  </div>
-                )}
-              </Field>
-              <Field name="choiceD">
-                {({ input, meta }) => (
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-row gap-3 justify-center items-center">
-                      <label className="font-medium w-fit">D</label>
-                      <input
-                        {...input}
-                        type="text"
-                        placeholder="Type your last choice ..."
-                        className="border-1 border-black rounded p-3 shadow text-base w-full"
-                      />
-                    </div>
-                    {meta.error && meta.touched && (
-                      <span className="text-red-400 text-sm font-medium">
-                        {meta.error}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </Field>
+              <InputForm
+                name={"choiceA"}
+                validate={required}
+                label={"A"}
+                placeholder={"Type your first choice ... "}
+              />
+              <InputForm
+                name={"choiceB"}
+                validate={required}
+                label={"B"}
+                placeholder={"Type your second choice ... "}
+              />
+              <InputForm
+                name={"choiceC"}
+                validate={required}
+                label={"C"}
+                placeholder={"Type your third choice ... "}
+              />
+              <InputForm
+                name={"choiceD"}
+                validate={required}
+                label={"D"}
+                placeholder={"Type your last choice ... "}
+              />
               <Field name="correctAnswer">
                 {({ input }) => (
                   <div className="flex flex-col gap-3">
